@@ -10,7 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
-import { formatPublicKey, getSortIconType, copyToClipboard } from "@/lib/utils"
+import { formatPublicKey, getSortIconType, copyToClipboard, printTime } from "@/lib/utils"
 import { ProviderDetails } from "./provider-details"
 
 interface ProviderTableProps {
@@ -22,10 +22,12 @@ interface ProviderTableProps {
 }
 
 export default function ProviderTable({ providers, loading, onSort, sortField, sortDirection }: ProviderTableProps) {
+  const safeProviders = Array.isArray(providers) ? providers : []
+
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
-  if (loading && providers.length === 0) {
+  if (loading && safeProviders.length === 0) {
     return (
       <div className="p-8 text-center">
         <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -34,7 +36,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
     )
   }
 
-  if (providers.length === 0) {
+  if (safeProviders.length === 0) {
     return (
       <div className="p-8 text-center">
         <p className="text-gray-500">Providers not found</p>
@@ -101,16 +103,16 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
           </tr>
         </thead>
         <tbody>
-          {providers.map((provider) => (
+          {safeProviders.map((provider) => (
             <>
-              <tr key={provider.id}>
+              <tr key={provider.pubkey}>
                 <td>
                   <div className="flex items-center">
-                    <span className="font-mono text-sm">{formatPublicKey(provider.publicKey)}</span>
+                    <span className="font-mono text-sm">{formatPublicKey(provider.pubkey)}</span>
                     <button
-                      onClick={() => copyToClipboard(provider.publicKey, setCopiedKey)}
+                      onClick={() => copyToClipboard(provider.pubkey, setCopiedKey)}
                       className={`ml-2 transition-colors duration-200
-                        ${copiedKey === provider.publicKey
+                        ${copiedKey === provider.pubkey
                           ? "text-gray-100 font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]"
                           : "text-gray-700 hover:text-gray-400"
                         }`}
@@ -119,25 +121,25 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     </button>
                   </div>
                 </td>
-                <td>{provider.uptime} %</td>
-                <td>{provider.workingTime} days</td>
+                <td>{provider.uptime * 100} %</td>
+                <td>{printTime(provider.working_time)}</td>
                 <td>
                   <div className="flex items-center">
-                    <span className="">{provider.providerRating.toFixed(4)}</span>
+                    <span className="">{provider.rating.toFixed(2)}</span>
                     <Star className="h-4 w-4 ml-2 text-yellow-400" />
                   </div>
                 </td>
-                <td>{provider.maxSpan / 3600} hours</td>
+                <td>{provider.max_span / 3600} hours</td>
                 <td>
                   <div className="flex items-center">{provider.price} 💎</div>
                 </td>
                 <td>
                   <button
-                    onClick={() => toggleRowExpand(provider.id)}
+                    onClick={() => toggleRowExpand(provider.pubkey)}
                     className="p-1 rounded-full hover:bg-gray-100"
-                    aria-label={expandedRows[provider.id] ? "Collapse details" : "Expand details"}
+                    aria-label={expandedRows[provider.pubkey] ? "Collapse details" : "Expand details"}
                   >
-                    {expandedRows[provider.id] ? (
+                    {expandedRows[provider.pubkey] ? (
                       <ChevronUp className="h-5 w-5 text-gray-500" />
                     ) : (
                       <ChevronDown className="h-5 w-5 text-gray-500" />
@@ -146,7 +148,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                 </td>
               </tr>
               
-              {expandedRows[provider.id] && (
+              {expandedRows[provider.pubkey] && (
                 <ProviderDetails provider={provider} />
               )}
             </>

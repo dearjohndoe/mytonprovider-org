@@ -35,3 +35,17 @@ export const copyToClipboard = (
       console.error("Failed to copy: ", err)
     })
 }
+
+export const printTime = (secs: number): string => {
+  if (secs < 60) return `${secs} sec`
+  
+  if (secs < 3600) return `${Math.floor(secs / 60)} min ${secs % 60} sec`
+  
+  if (secs < 86400)
+    return `${Math.floor(secs / 3600)} hr ${Math.floor((secs % 3600) / 60)} min`
+  
+  if (secs < 604800)
+    return `${Math.floor(secs / 86400)} days ${Math.floor((secs % 86400) / 3600)} hr ${Math.floor((secs % 3600) / 60)} min`
+
+  return `${Math.floor(secs / 86400)} days ${Math.floor((secs % 86400) / 3600)} hr`
+}

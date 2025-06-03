@@ -10,16 +10,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [sortField, setSortField] = useState<string | null>("providerRating")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadProviders()
   }, [])
 
   const loadProviders = async () => {
+    setError(null)
     setLoading(true)
     try {
       const data = await fetchProviders(0, 100, sortField, sortDirection)
-      setProviders(data)
+      if (data.errorMsg) {
+        setError(data.errorMsg)
+      } else {
+        setProviders(data.data.providers || [])
+      }
     } catch (error) {
       console.error("Failed to fetch providers:", error)
     } finally {
@@ -44,6 +50,9 @@ export default function Home() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {error && (
+            <p className="text-red-600 text-center py-4">{error}</p>
+        )}
         <ProviderTable
           providers={providers}
           loading={loading}
