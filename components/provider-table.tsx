@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import type { Provider } from "@/types/provider"
 import {
   Star,
@@ -121,7 +121,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     </button>
                   </div>
                 </td>
-                <td>{provider.uptime * 100} %</td>
+                <td>{(provider.uptime * 100).toFixed(2)} %</td>
                 <td>{printTime(provider.working_time)}</td>
                 <td>
                   <div className="flex items-center">
@@ -129,9 +129,12 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     <Star className="h-4 w-4 ml-2 text-yellow-400" />
                   </div>
                 </td>
-                <td>{provider.max_span / 3600} hours</td>
+                <td>{Math.floor(provider.max_span / 3600)} hours</td>
                 <td>
-                  <div className="flex items-center">{provider.price} 💎</div>
+                  <div className="flex items-center">
+                    {/* per gb per day */}
+                    {((provider.price * 1024) / 1_000_000_000).toFixed(4)} 💎
+                  </div>
                 </td>
                 <td>
                   <button
