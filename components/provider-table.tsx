@@ -10,15 +10,16 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
-import { formatPublicKey, getSortIconType, copyToClipboard, printTime } from "@/lib/utils"
+import { shortenString, getSortIconType, copyToClipboard, printTime } from "@/lib/utils"
 import { ProviderDetails } from "./provider-details"
+import HintWithIcon from "./hint"
 
 interface ProviderTableProps {
   providers: Provider[]
   loading: boolean
   onSort: (field: string) => void
   sortField: string | null
-  sortDirection: "asc" | "desc"
+  sortDirection: string
 }
 
 export default function ProviderTable({ providers, loading, onSort, sortField, sortDirection }: ProviderTableProps) {
@@ -60,13 +61,14 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full ton-table">
+    <div>
+      <table className="ton-table">
         <thead>
           <tr>
-            <th>
+            <th onClick={() => onSort("pubkey")}>
               <div className="flex items-center">
                 Public Key
+                {getSortIcon("pubkey")}
               </div>
             </th>
             <th onClick={() => onSort("uptime")}>
@@ -87,15 +89,10 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                 {getSortIcon("rating")}
               </div>
             </th>
-            <th onClick={() => onSort("maxSpan")}>
-              <div className="flex items-center">
-                Max span
-                {getSortIcon("maxSpan")}
-              </div>
-            </th>
             <th onClick={() => onSort("price")}>
               <div className="flex items-center">
                 Price
+                <HintWithIcon text="per 200 GB per 30 days" maxWidth={18}/>
                 {getSortIcon("price")}
               </div>
             </th>
@@ -108,7 +105,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
               <tr key={provider.pubkey}>
                 <td>
                   <div className="flex items-center">
-                    <span className="font-mono text-sm">{formatPublicKey(provider.pubkey)}</span>
+                    <span className="font-mono text-sm">{shortenString(provider.pubkey, 15)}</span>
                     <button
                       onClick={() => copyToClipboard(provider.pubkey, setCopiedKey)}
                       className={`ml-2 transition-colors duration-200
@@ -121,7 +118,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     </button>
                   </div>
                 </td>
-                <td>{(provider.uptime * 100).toFixed(2)} %</td>
+                <td>{(provider.uptime).toFixed(2)} %</td>
                 <td>{printTime(provider.working_time)}</td>
                 <td>
                   <div className="flex items-center">
@@ -129,11 +126,10 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     <Star className="h-4 w-4 ml-2 text-yellow-400" />
                   </div>
                 </td>
-                <td>{Math.floor(provider.max_span / 3600)} hours</td>
                 <td>
                   <div className="flex items-center">
                     {/* per gb per day */}
-                    {((provider.price * 1024) / 1_000_000_000).toFixed(4)} 💎
+                    {(provider.price / 1_000_000_000).toFixed(2)} TON
                   </div>
                 </td>
                 <td>
@@ -152,7 +148,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
               </tr>
               
               {expandedRows[provider.pubkey] && (
-                <ProviderDetails provider={provider} />
+                <ProviderDetails provider={provider} key={`${provider.pubkey}-details`}/>
               )}
             </>
           ))}

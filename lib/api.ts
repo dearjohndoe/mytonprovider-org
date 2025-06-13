@@ -1,11 +1,13 @@
 import axios, { AxiosError } from "axios"
 import type { Provider, ApiResponse } from "@/types/provider"
+import { FiltersData } from "@/types/filters";
 
 export async function fetchProviders(
   offset = 0,
   limit = 10,
+  filters: FiltersData,
   sortField: string | null = null,
-  sortDirection: "asc" | "desc" = "asc"
+  sortDirection: string = "asc"
 ): Promise<ApiResponse> {
     var loading = false;
     var providers :Provider[] = [];
@@ -18,7 +20,7 @@ export async function fetchProviders(
 
         loading = true
         await axios.post("https://mytonprovider.org/api/v1/providers/search", {
-          filter: {},
+          filters: filters,
           sort: sortField
             ? { column: sortField, order: sortDirection }
             : undefined,
@@ -28,7 +30,7 @@ export async function fetchProviders(
         })
         .then((response) => {
             loading = false
-            providers = response.data as Provider[];
+            providers = response.data.providers as Provider[];
             console.log("Fetched providers:", providers);
         })
         .catch((error :AxiosError) => {

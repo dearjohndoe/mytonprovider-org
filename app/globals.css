@@ -34,11 +34,6 @@ body {
   @apply bg-gray-50;
 }
 
-.ton-table th:first-child:hover {
-  background-color: white !important;
-  cursor: default !important;
-}
-
 .ton-table th:last-child:hover {
   background-color: white !important;
   cursor: default !important;
