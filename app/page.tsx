@@ -120,7 +120,7 @@ export default function Home() {
       <div className="bg-white rounded-lg overflow-hidden">
         {
         error ? (
-            <p className="text-red-600 text-center py-4">{error}</p>
+          <p className="text-red-600 text-center py-4">{error}</p>
         ): (
           <div className="p-4">
             {formBody()}

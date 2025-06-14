@@ -1,14 +1,18 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Header() {
   return (
-    <header className="w-full py-6">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 font-medium">
-            💎<span className="text-xl font-bold ml-2">TON Provider Explorer</span>
+    <header className="p-4">
+      <div className="flex space-x-6 justify-center">
+        <div className="flex-none w-[80%]">
+          <Link href="/" className="flex font-medium">
+            <span>
+              <Image className="rounded-full" src="/logo_48x48.png" alt="Logo" width={26} height={26} />
+            </span>
+            <span className="text-xl font-bold ml-2">TON Provider Explorer</span>
           </Link>
         </div>
       </div>

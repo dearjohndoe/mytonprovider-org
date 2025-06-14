@@ -4,16 +4,17 @@ import { Github, MessageCircle, Twitter, Mail } from "lucide-react"
 export default function Footer() {
   return (
     <footer className="py-8 border-t">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
+      <div className="flex space-x-6 justify-center">
+        <div className="flex-none w-[80%] justify-between flex items-center">
+          <div className="">
             <Link href="/support" className="flex items-center text-gray-500 hover:text-gray-900">
               <MessageCircle className="h-4 w-4 mr-2" />
               Support
             </Link>
-            <Link href="/about" className="flex items-center text-gray-500 hover:text-gray-900">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              About
+            {/* github */}
+            <Link href="https://github.com/dearjohndoe/mytonprovider-org" className="flex items-center text-gray-500 hover:text-gray-900">
+              <Github className="h-4 w-4 mr-2" />
+              GitHub
             </Link>
           </div>
 
