@@ -72,7 +72,7 @@ export default function Home() {
                 loadProviders(sortField, sortDirection, selectedFilters)
               }}
             />
-            <div>
+            <div className="overflow-x-auto">
               <DynamicProviderTable
                 providers={providers}
                 loading={loading}
@@ -93,16 +93,18 @@ export default function Home() {
                 sortDirection={sortDirection}
               />
             </div>
-            <DynamicFilters
-              onApply={(filters: FiltersData) => {
-                setSelectedFilters(filters)
-                loadProviders(sortField, sortDirection, filters)
-              }}
-              onReset={() => {
-                setSelectedFilters({} as FiltersData)
-                loadProviders(sortField, sortDirection, selectedFilters)
-              }}
-            />
+            <div>
+              <DynamicFilters
+                onApply={(filters: FiltersData) => {
+                  setSelectedFilters(filters)
+                  loadProviders(sortField, sortDirection, filters)
+                }}
+                onReset={() => {
+                  setSelectedFilters({} as FiltersData)
+                  loadProviders(sortField, sortDirection, selectedFilters)
+                }}
+              />
+            </div>
           </div>
         )
       }

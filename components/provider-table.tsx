@@ -62,7 +62,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
 
   return (
     <div>
-      <table className="ton-table">
+      <table className="ton-table overscroll-x-auto">
         <thead>
           <tr>
             <th onClick={() => onSort("pubkey")}>
@@ -101,7 +101,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
         </thead>
         <tbody>
           {safeProviders.map((provider) => (
-            <>
+            <React.Fragment key={provider.pubkey}>
               <tr key={provider.pubkey}>
                 <td>
                   <div className="flex items-center">
@@ -150,7 +150,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
               {expandedRows[provider.pubkey] && (
                 <ProviderDetails provider={provider} key={`${provider.pubkey}-details`}/>
               )}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>

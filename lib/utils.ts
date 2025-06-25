@@ -49,6 +49,29 @@ export const copyToClipboard = (
     })
 }
 
+export const timeDiff = (timestamp: number) => {
+  if (timestamp == 0) {
+    return 0
+  }
+
+  const currentDate = new Date()
+  return currentDate.getTime() / 1000 - timestamp
+}
+
+export const printSpace = (bytes: number): string => {
+  if (bytes <= 0) return ``
+
+  if (bytes <= 1024) return `${bytes} bytes`
+
+  if (bytes <= 1024 * 1024) return `${(bytes / 1024).toFixed(2)} Kb`
+
+  if (bytes <= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} Mb`
+
+  if (bytes <= 1024 * 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} Gb`
+
+  return ``
+}
+
 export const printUnixTime = (timestamp: number): string => {
   const date = new Date(timestamp * 1000)
   const options: Intl.DateTimeFormatOptions = {
@@ -65,31 +88,31 @@ export const printUnixTime = (timestamp: number): string => {
   return formattedDate.replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})/, '$3-$1-$2 $4:$5:$6')
 }
 
-export const printTime = (secs: number): string => {
-  if (secs < 60) return `${secs} sec`
+export const printTime = (secs: number, skipLast: boolean = false): string => {
+  if (secs < 60) return `${(secs).toFixed(0)} sec`
   
-  const seconds = secs % 60
+  const seconds = (secs % 60).toFixed(0)
   const minutes = Math.floor(secs / 60) % 60
   const hours = Math.floor(secs / 3600) % 24
   const days = Math.floor(secs / 86400) % 365
   const years = Math.floor(secs / 31536000)
   if (years > 0) {
-    return `${years} year${years > 1 ? 's' : ''} ${days ? `${days} days` : ''}`.trim()
+    return `${years} year${years > 1 ? 's' : ''} ${days && !skipLast ? `${days} days` : ''}`.trim()
   }
 
   if (secs < 3600) {
-    return `${minutes ? `${minutes} min ` : ''}${seconds ? `${seconds} sec` : ''}`.trim()
+    return `${minutes ? `${minutes} min ` : ''}${seconds && !skipLast ? `${seconds} sec` : ''}`.trim()
   }
 
   if (secs < 86400) {
-    return `${hours ? `${hours} hr ` : ''}${minutes ? `${minutes} min ` : ''}`.trim()
+    return `${hours ? `${hours} hr ` : ''}${minutes && !skipLast ? `${minutes} min ` : ''}`.trim()
   }
 
   if (secs < 604800) {
-    return `${days ? `${days} days ` : ''}${hours ? `${hours} hr ` : ''}${minutes ? `${minutes} min ` : ''}`.trim()
+    return `${days ? `${days} days ` : ''}${hours ? `${hours} hr ` : ''}${minutes && !skipLast ? `${minutes} min ` : ''}`.trim()
   }
 
-  return `${days ? `${days} days ` : ''}${hours ? `${hours} hr ` : ''}`.trim()
+  return `${days ? `${days} days ` : ''}${hours && !skipLast ? `${hours} hr ` : ''}`.trim()
 }
 
 

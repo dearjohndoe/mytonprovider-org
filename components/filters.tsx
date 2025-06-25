@@ -13,10 +13,9 @@ const getResetFiltersMap = () => ({
 export type FiltersProps = {
   onApply: (filters: FiltersData) => void
   onReset: () => void
-  className?: string
 }
 
-export function Filters({ onApply, onReset, className }: FiltersProps) {
+export function Filters({ onApply, onReset }: FiltersProps) {
   const [filters, setFilters] = useState(getResetFiltersMap())
 
   const handleTriStateChange = (name: string, value: boolean | null) => {
@@ -52,14 +51,14 @@ export function Filters({ onApply, onReset, className }: FiltersProps) {
   return (
       <>
           <div>
-            <form className="bg-white rounded-xl shadow-sm p-6 mt-2 mb-6 max-w-6xl mx-auto border border-gray-100 filters-form" style={{ boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 0.05), 0 -2px 16px 0 rgba(0,0,0,0.05)' }} onSubmit={handleSubmit}>
+            <form className="bg-gray-50 rounded-xl p-6 mt-2 mb-6 max-w-6xl mx-auto filters-form" onSubmit={handleSubmit}>
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                   <SlidersHorizontal className="h-5 w-5 text-blue-500" />
                   Filters
                 </h2>
               </div>
-              <div className="overflow-x-scroll" style={{ minHeight: '32vh', maxHeight: '50vh', maxWidth: '40', minWidth: '400px' }}>
+              <div className="min-w-[400px] max-w-[400px]">
                 <FieldGroup 
                   icon={<Info className="w-4 h-4 mr-2" />} 
                   title="Provider"
@@ -275,7 +274,7 @@ export function Filters({ onApply, onReset, className }: FiltersProps) {
                   />
                 </FieldGroup>
               </div>
-              <div className="flex gap-4 justify-end mt-4 sticky bottom-0 bg-white pt-4 z-10">
+              <div className="flex gap-4 justify-end mt-4 sticky bottom-0 pt-4 z-10">
                 <button type="button" onClick={handleReset} className="px-4 py-2 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100">Reset</button>
                 <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors">Apply Filters</button>
               </div>

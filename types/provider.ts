@@ -8,6 +8,7 @@ export interface Telemetry {
   provider_git_hash?: string | null
   total_provider_space?: number | null
   used_provider_space?: number | null
+  updated_at?: number | null
   cpu_name?: string | null
   cpu_number?: number | null
   cpu_is_virtual?: boolean | null
