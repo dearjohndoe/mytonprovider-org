@@ -19,7 +19,7 @@ export async function fetchProviders(
         }
 
         loading = true
-        await axios.post("http://localhost:9090/api/v1/providers/search", {
+        await axios.post("https://mytonprovider.org/api/v1/providers/search", {
           filters: filters,
           sort: sortField
             ? { column: sortField, order: sortDirection }
