@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import dynamic from 'next/dynamic';
 import type { Provider } from "@/types/provider"
 import { fetchProviders } from "@/lib/api"
@@ -21,29 +21,55 @@ export default function Home() {
   const [sortField, setSortField] = useState<string>(defaultField)
   const [sortDirection, setSortDirection] = useState<string>(defaultDirection)
   const [error, setError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const [currentOffset, setCurrentOffset] = useState(0)
+
+  const pageSize = 10
 
   useEffect(() => {
-    loadProviders(sortField, sortDirection, {} as FiltersData)
+    // Load initial data on component mount
+    loadProviders(defaultField, defaultDirection, {} as FiltersData, 0, false)
   }, [])
 
-  const loadProviders = async (sortField: string, sortDirection: string, actualFilters: FiltersData) => {
+  const loadProviders = useCallback(async (
+    sortField: string, 
+    sortDirection: string, 
+    actualFilters: FiltersData, 
+    offset: number = 0, 
+    append: boolean = false
+  ) => {
     setError(null)
     setLoading(true)
+    
+    // Reset pagination state for new queries
+    if (!append) {
+      setCurrentOffset(0)
+    }
+    
     try {
-      const data = await fetchProviders(0, 100, actualFilters, sortField, sortDirection)
+      const data = await fetchProviders(offset, pageSize, actualFilters, sortField, sortDirection)
       if (data.errorMsg) {
         setError(data.errorMsg)
       } else {
-        setProviders(data.data || [])
+        const newProviders = data.data || []
+        if (append) {
+          setProviders(prev => [...prev, ...newProviders])
+        } else {
+          setProviders(newProviders)
+        }
+
+        setHasMore(newProviders.length >= pageSize)
+        setCurrentOffset(offset + pageSize)
       }
     } catch (error) {
       console.error("Failed to fetch providers:", error)
+      setError("Failed to load providers. Please try again.")
     } finally {
       setLoading(false)
     }
-  }
+  }, [pageSize])
 
-  const handleSort = (field: string) => {
+  const handleSort = useCallback((field: string) => {
     var direction = "desc"
     if (sortField === field) {
       direction = sortDirection === "asc" ? "desc" : "asc"
@@ -53,8 +79,54 @@ export default function Home() {
       setSortDirection(direction)
     }
 
-    loadProviders(field, direction, selectedFilters)
-  }
+    loadProviders(field, direction, selectedFilters, 0, false)
+  }, [sortField, sortDirection, selectedFilters, loadProviders])
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      loadProviders(sortField, sortDirection, selectedFilters, currentOffset, true)
+    }
+  }, [hasMore, loading, sortField, sortDirection, selectedFilters, currentOffset, loadProviders])
+
+  const handleFilterApply = useCallback((filters: FiltersData) => {
+    setSelectedFilters(filters)
+    loadProviders(sortField, sortDirection, filters, 0, false)
+  }, [sortField, sortDirection, loadProviders])
+
+  const handleFilterReset = useCallback(() => {
+    const emptyFilters = {} as FiltersData
+    setSelectedFilters(emptyFilters)
+    loadProviders(sortField, sortDirection, emptyFilters, 0, false)
+  }, [sortField, sortDirection, loadProviders])
+
+  const renderLoadMoreSection = useCallback(() => {
+    if (loading && providers.length === 0) return null
+    if (providers.length === 0) return null
+    
+    return (
+      <div className="mt-6 text-center space-y-3">
+        <div className="text-sm text-gray-600">
+          Showing {providers.length} providers
+        </div>
+        {hasMore && (
+          <button
+            onClick={loadMore}
+            disabled={loading}
+            className="px-4 py-2 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100"
+          >
+            {loading ? (
+              <div className="flex">
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                Loading...
+              </div>
+            ) : (
+              'Load More'
+            )}
+          </button>
+        )}
+      </div>
+    )
+  }, [loading, providers.length, hasMore, loadMore])
 
   const formBody = () => {
     return (
@@ -63,46 +135,36 @@ export default function Home() {
         isMobile ? (
           <div className="container mx-auto">
             <DynamicFilters
-              onApply={(filters: FiltersData) => {
-                setSelectedFilters(filters)
-                loadProviders(sortField, sortDirection, filters)
-              }}
-              onReset={() => {
-                setSelectedFilters({} as FiltersData)
-                loadProviders(sortField, sortDirection, selectedFilters)
-              }}
+              onApply={handleFilterApply}
+              onReset={handleFilterReset}
             />
             <div className="overflow-x-auto">
               <DynamicProviderTable
                 providers={providers}
-                loading={loading}
+                loading={loading && providers.length === 0}
                 onSort={handleSort}
                 sortField={sortField}
                 sortDirection={sortDirection}
               />
             </div>
+            {renderLoadMoreSection()}
           </div>
         ) : (
           <div className="flex space-x-6 justify-center">
-            <div className="flex-none w-[55%]">
+            <div className="flex-none w-[55%] space-y-6">
               <DynamicProviderTable
                 providers={providers}
-                loading={loading}
+                loading={loading && providers.length === 0}
                 onSort={handleSort}
                 sortField={sortField}
                 sortDirection={sortDirection}
               />
+              {renderLoadMoreSection()}
             </div>
             <div>
               <DynamicFilters
-                onApply={(filters: FiltersData) => {
-                  setSelectedFilters(filters)
-                  loadProviders(sortField, sortDirection, filters)
-                }}
-                onReset={() => {
-                  setSelectedFilters({} as FiltersData)
-                  loadProviders(sortField, sortDirection, selectedFilters)
-                }}
+                onApply={handleFilterApply}
+                onReset={handleFilterReset}
               />
             </div>
           </div>
