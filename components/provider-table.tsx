@@ -100,9 +100,9 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
           </tr>
         </thead>
         <tbody>
-          {safeProviders.map((provider) => (
+          {safeProviders.map((provider, index) => (
             <React.Fragment key={provider.pubkey}>
-              <tr key={provider.pubkey}>
+              <tr key={provider.pubkey} className={index % 2 ? "" : "bg-gray-50"}>
                 <td>
                   <div className="flex items-center">
                     <span className="font-mono text-sm">{shortenString(provider.pubkey, 15)}</span>
@@ -128,7 +128,6 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                 </td>
                 <td>
                   <div className="flex items-center">
-                    {/* per gb per day */}
                     {(provider.price / 1_000_000_000).toFixed(2)} TON
                   </div>
                 </td>
@@ -136,7 +135,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                   <button
                     onClick={() => toggleRowExpand(provider.pubkey)}
                     className="p-1 rounded-full hover:bg-gray-100"
-                    aria-label={expandedRows[provider.pubkey] ? "Collapse details" : "Expand details"}
+                    aria-label={expandedRows[provider.pubkey] ? "Collapse" : "Expand"}
                   >
                     {expandedRows[provider.pubkey] ? (
                       <ChevronUp className="h-5 w-5 text-gray-500" />

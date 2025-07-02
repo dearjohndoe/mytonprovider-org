@@ -3,12 +3,16 @@
 import { useEffect, useState, useCallback } from "react"
 import dynamic from 'next/dynamic';
 import type { Provider } from "@/types/provider"
-import { fetchProviders } from "@/lib/api"
-import { FiltersData } from "@/types/filters"
+import { fetchFiltersRange, fetchProviders } from "@/lib/api"
+import { FiltersData, FiltersRange } from "@/types/filters"
 import { useIsMobile } from "@/hooks/useIsMobile"
+import React from "react";
 
 const defaultField = "rating"
 const defaultDirection = "desc"
+const pageSize = 20
+
+const defaultFilters = {uptime_gt_percent: 20, uptime_lt_percent: 100} as FiltersData
 
 const DynamicProviderTable = dynamic(() => import('@/components/provider-table').then(mod => mod.default), { ssr: false });
 const DynamicFilters = dynamic(() => import('@/components/filters').then(mod => mod.Filters), { ssr: false });
@@ -17,49 +21,67 @@ export default function Home() {
   const isMobile = useIsMobile()
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedFilters, setSelectedFilters] = useState<FiltersData>({} as FiltersData)
+  const [selectedFilters, setSelectedFilters] = useState<FiltersData>(defaultFilters)
   const [sortField, setSortField] = useState<string>(defaultField)
   const [sortDirection, setSortDirection] = useState<string>(defaultDirection)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
   const [currentOffset, setCurrentOffset] = useState(0)
-
-  const pageSize = 10
+  const [filtersRange, setFiltersRange] = React.useState<FiltersRange | null>(null)
 
   useEffect(() => {
-    // Load initial data on component mount
-    loadProviders(defaultField, defaultDirection, {} as FiltersData, 0, false)
+    loadFiltersRange()
+    loadProviders(defaultField, defaultDirection, selectedFilters, 0, false)
   }, [])
 
+  const loadFiltersRange = async() => {
+    try {
+      const response = await fetchFiltersRange()
+      if (response.errorMsg) {
+        console.error("Error loading filters range:", response.errorMsg)
+      } else if (response.data as FiltersRange) {
+        setFiltersRange(response.data as FiltersRange)
+      }
+    } catch (error) {
+      console.error("Failed to fetch filters range:", error)
+    }
+  }
+  
   const loadProviders = useCallback(async (
     sortField: string, 
     sortDirection: string, 
     actualFilters: FiltersData, 
     offset: number = 0, 
-    append: boolean = false
+    append: boolean = false,
+    customPageSize: number | null = null,
   ) => {
     setError(null)
     setLoading(true)
     
-    // Reset pagination state for new queries
     if (!append) {
       setCurrentOffset(0)
     }
     
     try {
-      const data = await fetchProviders(offset, pageSize, actualFilters, sortField, sortDirection)
+      var limit = pageSize
+      if (customPageSize !== null) {
+        limit = customPageSize
+        offset = 0
+      }
+
+      const data = await fetchProviders(offset, limit, actualFilters, sortField, sortDirection)
       if (data.errorMsg) {
         setError(data.errorMsg)
       } else {
-        const newProviders = data.data || []
+        const newProviders = data.data as Provider[] || []
         if (append) {
           setProviders(prev => [...prev, ...newProviders])
         } else {
           setProviders(newProviders)
         }
 
-        setHasMore(newProviders.length >= pageSize)
-        setCurrentOffset(offset + pageSize)
+        setHasMore(newProviders.length >= limit)
+        setCurrentOffset(offset + limit)
       }
     } catch (error) {
       console.error("Failed to fetch providers:", error)
@@ -67,7 +89,7 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }, [pageSize])
+  }, [])
 
   const handleSort = useCallback((field: string) => {
     var direction = "desc"
@@ -90,14 +112,13 @@ export default function Home() {
 
   const handleFilterApply = useCallback((filters: FiltersData) => {
     setSelectedFilters(filters)
-    loadProviders(sortField, sortDirection, filters, 0, false)
-  }, [sortField, sortDirection, loadProviders])
+    loadProviders(sortField, sortDirection, filters, 0, false, currentOffset)
+  }, [sortField, sortDirection, currentOffset, loadProviders])
 
   const handleFilterReset = useCallback(() => {
-    const emptyFilters = {} as FiltersData
-    setSelectedFilters(emptyFilters)
-    loadProviders(sortField, sortDirection, emptyFilters, 0, false)
-  }, [sortField, sortDirection, loadProviders])
+    setSelectedFilters(defaultFilters)
+    loadProviders(sortField, sortDirection, defaultFilters, 0, false)
+  }, [sortField, sortDirection, currentOffset, loadProviders])
 
   const renderLoadMoreSection = useCallback(() => {
     if (loading && providers.length === 0) return null
@@ -128,52 +149,6 @@ export default function Home() {
     )
   }, [loading, providers.length, hasMore, loadMore])
 
-  const formBody = () => {
-    return (
-      <div>
-      {
-        isMobile ? (
-          <div className="container mx-auto">
-            <DynamicFilters
-              onApply={handleFilterApply}
-              onReset={handleFilterReset}
-            />
-            <div className="overflow-x-auto">
-              <DynamicProviderTable
-                providers={providers}
-                loading={loading && providers.length === 0}
-                onSort={handleSort}
-                sortField={sortField}
-                sortDirection={sortDirection}
-              />
-            </div>
-            {renderLoadMoreSection()}
-          </div>
-        ) : (
-          <div className="flex space-x-6 justify-center">
-            <div className="flex-none w-[55%] space-y-6">
-              <DynamicProviderTable
-                providers={providers}
-                loading={loading && providers.length === 0}
-                onSort={handleSort}
-                sortField={sortField}
-                sortDirection={sortDirection}
-              />
-              {renderLoadMoreSection()}
-            </div>
-            <div>
-              <DynamicFilters
-                onApply={handleFilterApply}
-                onReset={handleFilterReset}
-              />
-            </div>
-          </div>
-        )
-      }
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-12 min-w-80 py-12">
       <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -182,14 +157,55 @@ export default function Home() {
       </div>
 
       <div className="bg-white rounded-lg overflow-hidden">
-        {
-        error ? (
-          <p className="text-red-600 text-center py-4">{error}</p>
-        ): (
-          <div className="p-4">
-            {formBody()}
-          </div>
-        )
+        { error ? (
+            <p className="text-red-600 text-center py-4">{error}</p>
+          ): (
+            <div className="p-4">
+            {
+              isMobile ? (
+                <div className="container mx-auto">
+                  <DynamicFilters
+                    onApply={handleFilterApply}
+                    onReset={handleFilterReset}
+                    filtersRange={filtersRange}
+                    applyedFilters={selectedFilters}
+                  />
+                  <div className="overflow-x-auto">
+                    <DynamicProviderTable
+                      providers={providers}
+                      loading={loading && providers.length === 0}
+                      onSort={handleSort}
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                    />
+                  </div>
+                  {renderLoadMoreSection()}
+                </div>
+              ) : (
+                <div className="flex space-x-6 justify-center">
+                  <div className="flex-none w-[55%] space-y-6">
+                    <DynamicProviderTable
+                      providers={providers}
+                      loading={loading && providers.length === 0}
+                      onSort={handleSort}
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                    />
+                    {renderLoadMoreSection()}
+                  </div>
+                  <div>
+                    <DynamicFilters
+                      onApply={handleFilterApply}
+                      onReset={handleFilterReset}
+                      filtersRange={filtersRange}
+                      applyedFilters={selectedFilters}
+                    />
+                  </div>
+                </div>
+              )
+            }
+            </div>
+          )
         }
       </div>
     </div>

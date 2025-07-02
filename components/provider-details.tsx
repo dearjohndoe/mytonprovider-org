@@ -21,11 +21,11 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
         if (isInteger) {
           value = Math.round(value);
         } else {
-          value = parseFloat(value.toString());
+          value = parseFloat(value.toString()).toFixed(2);
         }
       }
 
-      const text = !isEmpty ? value + (unit || '') : '—';
+      const text = !isEmpty ? `${value} ${(unit || '')}` : '—';
       const shorten = shortenString(text, 22);
       const title = shorten.length < text.length ? text : undefined;
 
@@ -86,8 +86,8 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                         provider.is_send_telemetry &&
                         <div>
                             <div className="flex items-center mb-2 text-gray-500 font-bold"><Globe className="w-4 h-4 mr-2" />Network</div>
-                            {renderField('Speedtest Download', t.speedtest_download, '')}
-                            {renderField('Speedtest Upload', t.speedtest_upload, '')}
+                            {renderField('Speedtest Download', t.speedtest_download ? t.speedtest_download / 1000000 : 0, ' Mbps')}
+                            {renderField('Speedtest Upload', t.speedtest_upload ? t.speedtest_upload / 1000000 : 0, ' Mbps')}
                             {renderField('Speedtest Ping', t.speedtest_ping, '')}
                             {renderField('Country', t.country)}
                             {renderField('ISP', t.isp)}

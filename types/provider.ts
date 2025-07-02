@@ -1,6 +1,8 @@
+import { FiltersRange } from "./filters"
+
 export interface ApiResponse {
   errorMsg: string | null
-  data: Provider[]
+  data: Provider[] | FiltersRange | null
 }
 
 export interface Telemetry {

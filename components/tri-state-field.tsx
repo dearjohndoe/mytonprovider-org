@@ -12,8 +12,6 @@ export function TriStateField({ label, name, value, onChange }: TriStateFieldPro
   const display = value === null ? "Any" : value ? "Yes" : "No"
   const color = value === null ? "bg-gray-200" : value ? "bg-gray-300" : "bg-gray-300"
 
-    console.info(`value: ${value}, nextValue: ${nextValue}, display: ${display}, color: ${color}`)
-
   return (
     <div className="flex items-center gap-2 mt-2">
       <label className="text-sm text-gray-700 cursor-pointer">{label}</label>

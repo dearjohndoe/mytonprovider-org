@@ -1,9 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
 
 export const parseNumber = (val: string) => {
   if (val === '' || val === null || val === undefined) return null
@@ -67,9 +61,7 @@ export const printSpace = (bytes: number): string => {
 
   if (bytes <= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} Mb`
 
-  if (bytes <= 1024 * 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} Gb`
-
-  return ``
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} Gb`
 }
 
 export const printUnixTime = (timestamp: number): string => {

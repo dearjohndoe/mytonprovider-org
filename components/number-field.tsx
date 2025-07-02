@@ -12,17 +12,56 @@ interface NumberFieldProps {
   max: number
   step: number
   setFilters: React.Dispatch<React.SetStateAction<FiltersData>>
+  isInteger?: boolean
+  resetTrigger?: number
 }
 
-export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, setFilters }: NumberFieldProps) {
-  const [localFrom, setLocalFrom] = useState(String(filters[nameFrom] ?? ""))
-  const [localTo, setLocalTo] = useState(String(filters[nameTo] ?? ""))
-  const isFilledFrom = localFrom !== ""
-  const isFilledTo = localTo !== ""
+export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, setFilters, isInteger, resetTrigger }: NumberFieldProps) {
+  const [localFrom, setLocalFrom] = useState("")
+  const [localTo, setLocalTo] = useState("")
+  const [inputFrom, setInputFrom] = useState("")
+  const [inputTo, setInputTo] = useState("")
+  const [sliderFrom, setSliderFrom] = useState<number>(filters[nameFrom] as number ?? min)
+  const [sliderTo, setSliderTo] = useState<number>(filters[nameTo] as number ?? max)
+
+  const formatValue = (val: number, floor: boolean) => {
+    if (isInteger) {
+      return String(floor ? Math.floor(val) : Math.ceil(val))
+    }
+    
+    return val.toFixed(2)
+  }
+
+  const updateFrom = (v: number) => {
+    const formatted = formatValue(v, true)
+    setLocalFrom(formatted)
+    setInputFrom(formatted)
+    setSliderFrom(v)
+  }
+
+  const updateTo = (v: number) => {
+    const formatted = formatValue(v, false)
+    setLocalTo(formatted)
+    setInputTo(formatted)
+    setSliderTo(v)
+  }
+
+  useEffect(() => {
+    if (filters[nameFrom] !== undefined && filters[nameTo] !== undefined) {
+      updateFrom(filters[nameFrom] as number)
+      updateTo(filters[nameTo] as number)
+    } else {
+      setInputFrom("")
+      setInputTo("")
+    }
+    
+    setSliderFrom(filters[nameFrom] as number ?? min)
+    setSliderTo(filters[nameTo] as number ?? max)
+  }, [resetTrigger])
 
   const handleSliderChange = ([from, to]: [number, number]) => {
-    setLocalFrom(String(from))
-    setLocalTo(String(to))
+    updateFrom(from)
+    updateTo(to)
   }
 
   function normalizeRange(from: number, to: number): [number, number] {
@@ -41,8 +80,8 @@ export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, 
   }
 
   const updateFilters = () => {
-    var valFrom = parseNumber(localFrom) || min
-    var valTo = parseNumber(localTo) || max
+    var valFrom = parseNumber(inputFrom) || min
+    var valTo = parseNumber(inputTo) || max
 
     const vals = normalizeRange(valFrom, valTo)
 
@@ -51,8 +90,52 @@ export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, 
         [nameFrom]: vals[0],
         [nameTo]: vals[1]
     }))
-    setLocalFrom(String(valFrom))
-    setLocalTo(String(valTo))
+    updateFrom(vals[0])
+    updateTo(vals[1])
+  }
+
+  const handleFromInputChange = (value: string) => {
+    if (/^\d*[.,]?\d*$/.test(value) || value === "") {
+      setInputFrom(value)
+    }
+  }
+
+  const handleToInputChange = (value: string) => {
+    if (/^\d*[.,]?\d*$/.test(value) || value === "") {
+      setInputTo(value)
+    }
+  }
+
+  const handleFromInputFinish = () => {
+    const v = parseNumber(inputFrom)
+    if (v !== null) {
+      updateFrom(v)
+    } else {
+      setInputFrom(localFrom)
+    }
+    updateFilters()
+  }
+
+  const handleToInputFinish = () => {
+    const v = parseNumber(inputTo)
+    if (v !== null) {
+      updateTo(v)
+    } else {
+      setInputTo(localTo)
+    }
+    updateFilters()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, isFromInput: boolean) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (isFromInput) {
+        handleFromInputFinish()
+      } else {
+        handleToInputFinish()
+      }
+      e.currentTarget.blur()
+    }
   }
 
   return (
@@ -67,20 +150,14 @@ export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, 
                 step={step}
                 name={nameFrom}
                 id={nameFrom}
-                value={localFrom}
-                onChange={e => {
-                if (/^\d*[.,]?\d*$/.test(e.target.value) || e.target.value === "") {
-                    setLocalFrom(e.target.value)
-                }
-                }}
-                onBlur={_ => {
-                    updateFilters()
-                }}
+                value={inputFrom}
+                onChange={e => handleFromInputChange(e.target.value)}
+                onBlur={handleFromInputFinish}
+                onKeyDown={e => handleKeyDown(e, true)}
                 className={
-                `bg-gray-100 rounded px-2 py-1 focus:ring-2 focus:ring-blue-200 outline-none transition-colors w-24 text-center ` +
-                (isFilledFrom ? "text-gray-700 bg-blue-500 placeholder-white" : "text-gray-700")
+                  "bg-gray-100 rounded px-2 py-1 focus:ring-2 focus:ring-blue-200 outline-none transition-colors w-24 text-center text-gray-700"
                 }
-                placeholder={`${min}`}
+                placeholder={`${formatValue(min, true)}`}
                 autoComplete="off"
             />
             <span className="text-gray-400 px-2">–</span>
@@ -91,20 +168,14 @@ export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, 
                 step={step}
                 name={nameTo}
                 id={nameTo}
-                value={localTo}
-                onChange={e => {
-                if (/^\d*[.,]?\d*$/.test(e.target.value) || e.target.value === "") {
-                    setLocalTo(e.target.value)
-                }
-                }}
-                onBlur={_ => {
-                    updateFilters()
-                }}
+                value={inputTo}
+                onChange={e => handleToInputChange(e.target.value)}
+                onBlur={handleToInputFinish}
+                onKeyDown={e => handleKeyDown(e, false)}
                 className={
-                `bg-gray-100 rounded px-2 py-1 focus:ring-2 focus:ring-blue-200 outline-none transition-colors w-24 text-center ` +
-                (isFilledTo ? "text-gray-700 bg-blue-500 placeholder-white" : "text-gray-700")
+                  "bg-gray-100 rounded px-2 py-1 focus:ring-2 focus:ring-blue-200 outline-none transition-colors w-24 text-center text-gray-700"
                 }
-                placeholder={`${max}`}
+                placeholder={`${formatValue(max, false)}`}
                 autoComplete="off"
             />
         </div>
@@ -113,7 +184,7 @@ export function NumberField({ label, nameFrom, nameTo, filters, min, max, step, 
             className="mt-4"
             min={min}
             max={max}
-            value={[parseNumber(localFrom) || min, parseNumber(localTo) || max]}
+            value={[sliderFrom, sliderTo]}
             onChange={handleSliderChange}
             onAfterChange={updateFilters}
             step={step}
