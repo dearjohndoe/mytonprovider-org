@@ -1,7 +1,7 @@
-import { printSpace, printTime, printUnixTime, shortenString, timeDiff } from "@/lib/utils";
+import { copyToClipboard, printSpace, printTime, printUnixTime, shortenString, timeDiff } from "@/lib/utils";
 import type { Provider } from "@/types/provider"
-import { Cpu, Globe, Info, Server, BarChart2 } from "lucide-react"
-import { useMemo } from "react";
+import { Cpu, Globe, Info, Server, BarChart2, Copy } from "lucide-react"
+import { useMemo, useState } from "react";
 
 type ProviderDetailsProps = {
     provider: Provider
@@ -13,7 +13,9 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
         return timeDiff(provider.telemetry?.updated_at || 0)
     }, [provider.telemetry?.updated_at]);
 
-    const renderField = (label: string, value: any, unit?: string, isInteger?: boolean) => {
+    const renderField = (label: string, value: any, unit?: string, link?: string, copy?: string, isInteger?: boolean) => {
+      const [copiedKey, setCopiedKey] = useState<string | null>(null);
+      
       const isEmpty = value === null || value === undefined || value === '' || Number.isNaN(value) || value === 0;
 
       const isNumber = typeof value === 'number' && !isNaN(value);
@@ -32,7 +34,29 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
       return (
         <div className="flex items-center mb-2">
           <span className="font-semibold w-56 inline-block">{label}</span>
-          <span className="ml-2 truncate"  title={title}>{shorten}</span>
+          {link ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              <span className="truncate" title={title}>{shorten}</span>
+            </a>
+          ) : (
+            <span className="truncate" title={title}>{shorten}</span>
+          )}
+          {/* <span className="ml-2 truncate" title={title}>{shorten}</span> */}
+          {copy && (
+            <button
+              onClick={() => copyToClipboard(copy, setCopiedKey)}
+              className={`ml-2 transition-colors duration-200
+              ${copiedKey === copy
+                  ? "text-gray-100 font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]"
+                  : "text-gray-700 hover:text-gray-400"
+              }`}
+            ><Copy className="h-4 w-4" /></button>
+          )}
         </div>
       );
     };
@@ -51,11 +75,11 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                     {/* Provider */}
                     <div>
                         <div className="flex items-center mb-2 text-gray-500 font-bold"><Info className="w-4 h-4 mr-2" />Provider</div>
+                        {renderField('Address', provider.address, '', `https://tonscan.org/address/${provider.address}`, provider.address, true)}
                         {renderField('Max Span', printTime(provider.max_span))}
                         {renderField('Min Span', printTime(provider.min_span))}
                         {renderField('Max Bag Size', printSpace(provider.max_bag_size_bytes))}
                         {renderField('Registration Time', printUnixTime(provider.reg_time))}
-                        {renderField('Send Telemetry', provider.is_send_telemetry ? 'Yes' : 'No')}
                     </div>
 
                     {/* Hardware */}

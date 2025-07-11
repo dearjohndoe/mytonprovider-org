@@ -19,6 +19,7 @@ const DynamicFilters = dynamic(() => import('@/components/filters').then(mod => 
 
 export default function Home() {
   const isMobile = useIsMobile()
+  const [isShowFilters, setIsShowFilters] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedFilters, setSelectedFilters] = useState<FiltersData>(defaultFilters)
@@ -111,11 +112,14 @@ export default function Home() {
   }, [hasMore, loading, sortField, sortDirection, selectedFilters, currentOffset, loadProviders])
 
   const handleFilterApply = useCallback((filters: FiltersData) => {
+    setIsShowFilters(false)
+    console.info(filters)
     setSelectedFilters(filters)
     loadProviders(sortField, sortDirection, filters, 0, false, currentOffset)
   }, [sortField, sortDirection, currentOffset, loadProviders])
 
   const handleFilterReset = useCallback(() => {
+    setIsShowFilters(false)
     setSelectedFilters(defaultFilters)
     loadProviders(sortField, sortDirection, defaultFilters, 0, false)
   }, [sortField, sortDirection, currentOffset, loadProviders])
@@ -150,50 +154,28 @@ export default function Home() {
   }, [loading, providers.length, hasMore, loadMore])
 
   return (
-    <div className="space-y-12 min-w-80 py-12">
-      <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold">TON Storage Providers</h1>
-        <p className="text-xl text-gray-600">Find and compare storage providers on the TON network</p>
-      </div>
+    <div className="relative">
+      { 
+        isMobile && 
+          <div className="fixed inset-0 z-50 overflow-hidden" hidden={!isShowFilters}>
+              <div
+                  className="fixed inset-0 bg-black bg-opacity-50"
+                  onClick={() => {
+                    setIsShowFilters(false)
+                  }}
+              ></div>
+          
+              <div className="absolute inset-0 flex items-start justify-center p-4 overflow-y-auto">
+                  <button
+                      className="absolute top-4 right-4 z-10 rounded bg-gray-200 p-2 hover:bg-gray-300"
+                      onClick={() => {
+                    setIsShowFilters(false)
+                  }}
+                  >
+                      ✕
+                  </button>
 
-      <div className="bg-white rounded-lg overflow-hidden">
-        { error ? (
-            <p className="text-red-600 text-center py-4">{error}</p>
-          ): (
-            <div className="p-4">
-            {
-              isMobile ? (
-                <div className="container mx-auto">
-                  <DynamicFilters
-                    onApply={handleFilterApply}
-                    onReset={handleFilterReset}
-                    filtersRange={filtersRange}
-                    applyedFilters={selectedFilters}
-                  />
-                  <div className="overflow-x-auto">
-                    <DynamicProviderTable
-                      providers={providers}
-                      loading={loading && providers.length === 0}
-                      onSort={handleSort}
-                      sortField={sortField}
-                      sortDirection={sortDirection}
-                    />
-                  </div>
-                  {renderLoadMoreSection()}
-                </div>
-              ) : (
-                <div className="flex space-x-6 justify-center">
-                  <div className="flex-none w-[55%] space-y-6">
-                    <DynamicProviderTable
-                      providers={providers}
-                      loading={loading && providers.length === 0}
-                      onSort={handleSort}
-                      sortField={sortField}
-                      sortDirection={sortDirection}
-                    />
-                    {renderLoadMoreSection()}
-                  </div>
-                  <div>
+                  <div className="bg-gray-50 rounded-xl p-6 mt-2 mb-6 mx-auto filters-form" onSubmit={() => {}}>
                     <DynamicFilters
                       onApply={handleFilterApply}
                       onReset={handleFilterReset}
@@ -201,12 +183,74 @@ export default function Home() {
                       applyedFilters={selectedFilters}
                     />
                   </div>
-                </div>
-              )
-            }
-            </div>
-          )
-        }
+              </div>
+          </div>
+      }
+
+      <div className="space-y-12 min-w-80 py-12">
+
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold">TON Storage Providers</h1>
+          <p className="text-xl text-gray-600">Find and compare storage providers on the TON network</p>
+        </div>
+
+        <div className="bg-white rounded-lg overflow-hidden">
+          { error ? (
+              <p className="text-red-600 text-center py-4">{error}</p>
+            ): (
+              <div className="p-4">
+              {
+                isMobile ? (
+                  <div>
+                    <div className="flex justify-center">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setIsShowFilters(!isShowFilters)
+                        }} 
+                        className="mb-10 px-4 py-2 border border-gray-300 rounded-full text-gray-600 hover:bg-gray-100">
+                        Show filters
+                      </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <DynamicProviderTable
+                        providers={providers}
+                        loading={loading && providers.length === 0}
+                        onSort={handleSort}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                      />
+                    </div>
+                    {renderLoadMoreSection()}
+                  </div>
+                ) : (
+                  <div className="flex space-x-6 justify-center">
+                    <div className="flex-none w-[55%] space-y-6">
+                      <DynamicProviderTable
+                        providers={providers}
+                        loading={loading && providers.length === 0}
+                        onSort={handleSort}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                      />
+                      {renderLoadMoreSection()}
+                    </div>
+                    <div>
+                      <DynamicFilters
+                        onApply={handleFilterApply}
+                        onReset={handleFilterReset}
+                        filtersRange={filtersRange}
+                        applyedFilters={selectedFilters}
+                      />
+                    </div>
+                  </div>
+                )
+              }
+              </div>
+            )
+          }
+        </div>
       </div>
     </div>
   )
