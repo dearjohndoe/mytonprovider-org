@@ -28,6 +28,7 @@ export interface Telemetry {
 }
 
 export interface Provider {
+  status: number | null
   pubkey: string
   address: string
   uptime: number
