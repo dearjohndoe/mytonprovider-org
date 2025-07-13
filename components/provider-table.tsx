@@ -102,6 +102,11 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                 {getSortIcon("pubkey")}
               </div>
             </th>
+            <th onClick={() => {}}>
+              <div className="flex items-center">
+                Status
+              </div>
+            </th>
             <th onClick={() => onSort("uptime")}>
               <div className="flex items-center">
                 Uptime
@@ -149,6 +154,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     </button>
                   </div>
                 </td>
+                <td><StatusCell status={provider.status} /></td>
                 <td>{(provider.uptime).toFixed(2)} %</td>
                 <td>{printTime(provider.working_time)}</td>
                 <td>
@@ -175,6 +181,36 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+function StatusCell({ status }: { status: number | null }) {
+  const getStatusInfo = () => {
+    switch (status) {
+      case null:
+        return { color: 'bg-gray-400', text: 'No Data', textColor: 'text-gray-500' }
+      case 0:
+        return { color: 'bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]', text: 'Verified', textColor: 'text-green-600' }
+      case 2:
+        return { color: 'bg-orange-500 shadow-[0_0_4px_rgba(249,115,22,0.4)]', text: 'Invalid', textColor: 'text-orange-600' }
+      case 3:
+        return { color: 'bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.4)]', text: 'Not Store', textColor: 'text-red-600' }
+      case 500:
+        return { color: 'bg-gray-700', text: 'Not Access', textColor: 'text-gray-700' }
+      default:
+        return { color: 'bg-gray-400', text: 'Unknown', textColor: 'text-gray-500' }
+    }
+  }
+
+  const statusInfo = getStatusInfo()
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2 h-2 rounded-full ${statusInfo.color} ${status === null ? 'animate-pulse' : ''}`}></div>
+      <span className={`text-xs font-medium ${statusInfo.textColor}`}>
+        {statusInfo.text}
+      </span>
     </div>
   )
 }
