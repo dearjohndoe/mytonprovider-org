@@ -7,8 +7,7 @@ import {
   Copy,
   ArrowUp,
   ArrowDown,
-  ChevronDown,
-  ChevronUp,
+  InfoIcon,
 } from "lucide-react"
 import { shortenString, getSortIconType, copyToClipboard, printTime } from "@/lib/utils"
 import { ProviderDetails } from "./provider-details"
@@ -25,7 +24,7 @@ interface ProviderTableProps {
 export default function ProviderTable({ providers, loading, onSort, sortField, sortDirection }: ProviderTableProps) {
   const safeProviders = Array.isArray(providers) ? providers : []
 
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   if (loading && safeProviders.length === 0) {
@@ -45,13 +44,6 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
     )
   }
 
-  const toggleRowExpand = (id: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
-  }
-
   const getSortIcon = (field: string) => {
     const iconType = getSortIconType(field, sortField, sortDirection)
     if (!iconType) return null
@@ -62,6 +54,45 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
 
   return (
     <div>
+      
+      {/* Details modal */}
+      <div className="fixed inset-0 z-50 overflow-hidden" hidden={selectedProvider === null}>
+        <div className="absolute inset-0 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative bg-white border shadow-2xl rounded-xl p-8 mt-4 mb-4 mx-auto max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <button
+                className="absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors duration-200"
+                onClick={() => setSelectedProvider(null)}
+            >
+                <span className="text-gray-600 text-lg font-medium">✕</span>
+            </button>
+
+            {selectedProvider && (
+              <div>
+                <p className="text-md text-gray-700 mb-2">
+                  <span className="text-gray-900 font-semibold">Provider details:</span> {shortenString(selectedProvider.pubkey, 35)}
+                  <button
+                    onClick={() => copyToClipboard(selectedProvider.pubkey, setCopiedKey)}
+                    className={`ml-2 transition-colors duration-200
+                      ${copiedKey === selectedProvider.pubkey
+                        ? "text-gray-100 font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]"
+                        : "text-gray-700 hover:text-gray-400"
+                      }`}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </p>
+                {/* <div className="mx-auto"> */}
+                  <div className="flex justify-center">
+                    <ProviderDetails provider={selectedProvider} key={`${selectedProvider.pubkey}-details`}/>
+                  </div>
+                {/* </div> */}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Providers table */}
       <table className="ton-table overscroll-x-auto">
         <thead>
           <tr>
@@ -133,22 +164,13 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                 </td>
                 <td>
                   <button
-                    onClick={() => toggleRowExpand(provider.pubkey)}
+                    onClick={() => setSelectedProvider(provider)}
                     className="p-1 rounded-full hover:bg-gray-100"
-                    aria-label={expandedRows[provider.pubkey] ? "Collapse" : "Expand"}
                   >
-                    {expandedRows[provider.pubkey] ? (
-                      <ChevronUp className="h-5 w-5 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-500" />
-                    )}
+                    <InfoIcon className="h-5 w-5 text-gray-500" />
                   </button>
                 </td>
               </tr>
-              
-              {expandedRows[provider.pubkey] && (
-                <ProviderDetails provider={provider} key={`${provider.pubkey}-details`}/>
-              )}
             </React.Fragment>
           ))}
         </tbody>

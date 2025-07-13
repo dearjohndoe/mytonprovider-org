@@ -64,7 +64,7 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
     return (
         <tr>
             <>
-                <td colSpan={7} className="bg-gray-50 p-0">
+                <td colSpan={7} className="p-2">
                     
                 {/* Status Panel */}
                 <div className="my-4 p-5 rounded-lg border-2 bg-white">
