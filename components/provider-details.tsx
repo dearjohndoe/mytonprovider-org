@@ -28,7 +28,7 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
       }
 
       const text = !isEmpty ? `${value} ${(unit || '')}` : '—';
-      const shorten = shortenString(text, 22);
+      const shorten = shortenString(text, 15);
       const title = shorten.length < text.length ? text : undefined;
 
       return (
@@ -79,8 +79,22 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                             )}
                             {provider.status === 0 && (
                                 <>
-                                    <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>
-                                    <span className="text-sm text-green-600 font-medium">Verified</span>
+                                    {provider.status_ratio < 0.75 ? (
+                                        <>
+                                            <div className="w-2 h-2 bg-red-500 rounded-full shadow-[0_0_6px_rgba(239,68,68,0.6)]"></div>
+                                            <span className="text-sm text-red-600 font-medium">Unstable ({(provider.status_ratio * 100).toFixed(1)}%)</span>
+                                        </>
+                                    ) : provider.status_ratio < 0.99 ? (
+                                        <>
+                                            <div className="w-2 h-2 bg-yellow-500 rounded-full shadow-[0_0_6px_rgba(234,179,8,0.6)]"></div>
+                                            <span className="text-sm text-yellow-600 font-medium">Partial ({(provider.status_ratio * 100).toFixed(1)}%)</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>
+                                            <span className="text-sm text-green-600 font-medium">Stable ({provider.status_ratio === 1.0 ? '100%' : (provider.status_ratio * 100).toFixed(1) + '%'})</span>
+                                        </>
+                                    )}
                                 </>
                             )}
                             {provider.status === 2 && (
@@ -105,9 +119,9 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                     </div>
                     
                     {/* Status Description */}
-                    <div className="mt-2 text-xs text-gray-500">
+                    <div className="mt-2 text-sm text-gray-500">
                         {provider.status === null && "Provider is not storing any data or we just don't check it yet"}
-                        {provider.status === 0 && "Provider is verified and passing all checks"}
+                        {provider.status === 0 && "Status is calculated based on the percentage of files available for download from those stored by the provider"}
                         {provider.status === 2 && "Provider contains invalid or corrupted data"}
                         {provider.status === 3 && "Provider has some storage contracts, but not actually storing them"}
                         {provider.status === 500 && "Provider was not accessible when we tried to check it"}

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import type { Provider } from "@/types/provider"
 import {
   Star,
@@ -26,6 +26,19 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
 
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && selectedProvider) {
+        setSelectedProvider(null)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscKey)
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [selectedProvider])
 
   if (loading && safeProviders.length === 0) {
     return (
@@ -105,11 +118,13 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
             <th onClick={() => {}}>
               <div className="flex items-center">
                 Status
+                <HintWithIcon text="% of stored files accessible for download" maxWidth={24}/>
               </div>
             </th>
             <th onClick={() => onSort("uptime")}>
               <div className="flex items-center">
                 Uptime
+                <HintWithIcon text="% of time online for uploads/contracts" maxWidth={24}/>
                 {getSortIcon("uptime")}
               </div>
             </th>
@@ -138,7 +153,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
         <tbody>
           {safeProviders.map((provider, index) => (
             <React.Fragment key={provider.pubkey}>
-              <tr key={provider.pubkey} className={index % 2 ? "" : "bg-gray-50"}>
+              <tr key={provider.pubkey} className={`group ${index % 2 ? "" : "bg-gray-50"}`}>
                 <td>
                   <div className="flex items-center">
                     <span className="font-mono text-sm">{shortenString(provider.pubkey, 15)}</span>
@@ -154,13 +169,13 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                     </button>
                   </div>
                 </td>
-                <td><StatusCell status={provider.status} /></td>
+                <td><StatusCell status={provider.status} ratio={provider.status_ratio} /></td>
                 <td>{(provider.uptime).toFixed(2)} %</td>
                 <td>{printTime(provider.working_time)}</td>
                 <td>
                   <div className="flex items-center">
-                    <span className="">{provider.rating.toFixed(2)}</span>
-                    <Star className="h-4 w-4 ml-2 text-yellow-400" />
+                    <Star className="h-4 w-4 text-yellow-400 fill-transparent group-hover:fill-yellow-400 transition-all duration-200" />
+                    <span className="ml-2">{provider.rating.toFixed(2)}</span>
                   </div>
                 </td>
                 <td>
@@ -185,19 +200,25 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
   )
 }
 
-function StatusCell({ status }: { status: number | null }) {
+function StatusCell({status, ratio}: {status: number | null, ratio: number}) {
   const getStatusInfo = () => {
     switch (status) {
       case null:
         return { color: 'bg-gray-400', text: 'No Data', textColor: 'text-gray-500' }
       case 0:
-        return { color: 'bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]', text: 'Verified', textColor: 'text-green-600' }
+        if (ratio < 0.75) {
+          return { color: 'bg-red-500 shadow-[0_0_4px_rgba(234,179,8,0.4)]', text: `Unstable`, textColor: 'text-red-600' }
+        } else if (ratio < 0.99) {
+          return { color: 'bg-yellow-500 shadow-[0_0_4px_rgba(234,179,8,0.4)]', text: `Partial`, textColor: 'text-yellow-600' }
+        }
+
+        return { color: 'bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]', text: `Stable`, textColor: 'text-green-600' }
       case 2:
         return { color: 'bg-orange-500 shadow-[0_0_4px_rgba(249,115,22,0.4)]', text: 'Invalid', textColor: 'text-orange-600' }
       case 3:
         return { color: 'bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.4)]', text: 'Not Store', textColor: 'text-red-600' }
       case 500:
-        return { color: 'bg-gray-700', text: 'Not Access', textColor: 'text-gray-700' }
+        return { color: 'bg-gray-700', text: 'Not Accessible', textColor: 'text-gray-700' }
       default:
         return { color: 'bg-gray-400', text: 'Unknown', textColor: 'text-gray-500' }
     }
@@ -211,6 +232,13 @@ function StatusCell({ status }: { status: number | null }) {
       <span className={`text-xs font-medium ${statusInfo.textColor}`}>
         {statusInfo.text}
       </span>
+      {
+        status == 0 && (
+          <span className="text-xs font-medium text-gray-900">
+            {ratio === 1.0 ? "(100%)" : "(" + (ratio * 100).toFixed(1) + "%)"}
+          </span>
+        )
+      }
     </div>
   )
 }
