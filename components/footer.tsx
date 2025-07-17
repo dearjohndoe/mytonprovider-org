@@ -1,35 +1,47 @@
 import Link from "next/link"
-import { Github, MessageCircle, Twitter, Mail } from "lucide-react"
+import { Github, MessageCircle, ArrowBigUp, Server } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="py-8 border-t">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <Link href="/support" className="flex items-center text-gray-500 hover:text-gray-900">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Support
+    <footer className="py-8">
+
+      <div className="flex w-[90%] space-x-6 my-4">
+        <div className="ml-auto mr-4">
+          <Link href="#" className="flex items-center text-gray-500 hover:text-gray-900">
+            <ArrowBigUp className="h-4 w-4 mr-2" />
+            Go up 
+          </Link>
+        </div>
+      </div>
+      
+      <div className="flex space-x-6 justify-center border-t">
+        <div className="flex-none w-[80%] justify-between flex pt-8 items-center">
+          <div>
+            <Link href="https://github.com/igroman787/mytonprovider/blob/master/README.md" target="_blank" className="flex mb-4 items-center text-gray-500 hover:text-gray-900">
+              <Server className="h-4 w-4 mr-2" />
+              Become Provider
             </Link>
-            <Link href="/about" className="flex items-center text-gray-500 hover:text-gray-900">
+            {/* <br /> */}
+            <Link href="https://t.me/tondev" target="_blank" className="flex my-2 items-center text-gray-500 hover:text-gray-900">
               <MessageCircle className="h-4 w-4 mr-2" />
-              About
+              Support RU
             </Link>
+            <Link href="https://t.me/tondev_eng" target="_blank" className="flex mb-4 items-center text-gray-500 hover:text-gray-900">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Support EN
+            </Link>
+            {/* <br /> */}
+            <Link href="https://github.com/dearjohndoe/mytonprovider-backend" target="_blank" className="flex my-2 items-center text-gray-500 hover:text-gray-900">
+              <Github className="h-4 w-4 mr-2" />
+              GitHub (backend)
+            </Link>
+            <Link href="https://github.com/dearjohndoe/mytonprovider-org" target="_blank" className="flex my-2 items-center text-gray-500 hover:text-gray-900">
+              <Github className="h-4 w-4 mr-2" />
+              GitHub (frontend)
+            </Link> 
           </div>
 
-          <div className="flex space-x-4">
-            <Link href="#" className="text-gray-400 hover:text-gray-900">
-              <Twitter className="h-5 w-5" />
-            </Link>
-            <Link href="#" className="text-gray-400 hover:text-gray-900">
-              <Github className="h-5 w-5" />
-            </Link>
-            <Link href="#" className="text-gray-400 hover:text-gray-900">
-              <MessageCircle className="h-5 w-5" />
-            </Link>
-            <Link href="#" className="text-gray-400 hover:text-gray-900">
-              <Mail className="h-5 w-5" />
-            </Link>
+          <div className="flex space-x-4 mt-4">
           </div>
         </div>
       </div>

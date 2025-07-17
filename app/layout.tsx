@@ -1,4 +1,4 @@
-import type React from "react"
+import React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -17,12 +17,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
     <html lang="ru">
       <body className={inter.className}>
         <div className="flex flex-col min-h-screen">
           <Header />
-          <main className="flex-grow container mx-auto px-4 py-8">{children}</main>
+          <main className="flex-grow w-full px-2 py-6">{children}</main>
           <Footer />
         </div>
       </body>
