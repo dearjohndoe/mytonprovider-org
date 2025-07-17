@@ -10,7 +10,7 @@ interface TriStateFieldProps {
 export function TriStateField({ label, name, value, onChange }: TriStateFieldProps) {
   const nextValue = value === null ? true : value === true ? false : null
   const display = value === null ? "Any" : value ? "Yes" : "No"
-  const color = value === null ? "bg-gray-200" : value ? "bg-gray-300" : "bg-gray-300"
+  const color = value === null ? "bg-gray-200" : "bg-gray-300"
 
   return (
     <div className="flex items-center gap-2 mt-2">

@@ -153,7 +153,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
         <tbody>
           {safeProviders.map((provider, index) => (
             <React.Fragment key={provider.pubkey}>
-              <tr key={provider.pubkey} className={`group ${index % 2 ? "" : "bg-gray-50"}`}>
+              <tr key={provider.pubkey} className={`group ${index % 2 ? "" : "bg-gray-50"} ${selectedProvider?.pubkey === provider.pubkey ? "!bg-blue-100" : ""} hover:bg-blue-50 transition-colors duration-200`}>
                 <td>
                   <div className="flex items-center">
                     <span className="font-mono text-sm">{shortenString(provider.pubkey, 15)}</span>
@@ -206,7 +206,7 @@ function StatusCell({status, ratio}: {status: number | null, ratio: number}) {
       case null:
         return { color: 'bg-gray-400', text: 'No Data', textColor: 'text-gray-500' }
       case 0:
-        if (ratio < 0.75) {
+        if (ratio < 0.8) {
           return { color: 'bg-red-500 shadow-[0_0_4px_rgba(234,179,8,0.4)]', text: `Unstable`, textColor: 'text-red-600' }
         } else if (ratio < 0.99) {
           return { color: 'bg-yellow-500 shadow-[0_0_4px_rgba(234,179,8,0.4)]', text: `Partial`, textColor: 'text-yellow-600' }
