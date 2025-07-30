@@ -23,29 +23,13 @@ export function PopupList({
   maxHeight = "max-h-48"
 }: PopupListProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
   const [localValue, setLocalValue] = useState(value || "")
-  const [filteredOptions, setFilteredOptions] = useState(options)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Update local value when external value changes or on reset
   useEffect(() => {
     setLocalValue(value || "")
-    setSearchTerm("")
   }, [value, resetTrigger])
-
-  // Filter options based on search term
-  useEffect(() => {
-    if (searchTerm === "") {
-      setFilteredOptions(options)
-    } else {
-      const filtered = options.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-    }
-  }, [searchTerm, options])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -63,37 +47,12 @@ export function PopupList({
     setLocalValue(option)
     onChange(name, option)
     setIsOpen(false)
-    setSearchTerm("")
   }
 
   const handleClear = () => {
     setLocalValue("")
     onChange(name, null)
     setIsOpen(false)
-    setSearchTerm("")
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Input is read-only, no changes allowed
-  }
-
-  const handleInputBlur = () => {
-    // No custom values, no blur handling needed
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      if (filteredOptions.length > 0) {
-        handleOptionSelect(filteredOptions[0])
-      }
-    } else if (e.key === "Escape") {
-      setIsOpen(false)
-      setSearchTerm("")
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault()
-      setIsOpen(true)
-    }
   }
 
   const displayValue = localValue || ""
@@ -112,17 +71,15 @@ export function PopupList({
           name={name}
           id={name}
           value={displayValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
           onClick={() => setIsOpen(!isOpen)}
-          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           readOnly={true}
           className={`
-            w-full border rounded px-3 py-2 pr-16 
+            w-full rounded px-3 py-2 pr-16 border border-gray-100
             focus:ring-2 focus:ring-blue-200 focus:outline-none
+            text-gray-700
             cursor-pointer
-            ${hasValue ? 'bg-white' : 'bg-gray-50'}
+            ${hasValue ? 'bg-white' : 'bg-gray-100'}
           `}
         />
         
@@ -157,8 +114,8 @@ export function PopupList({
           ${maxHeight} overflow-hidden
         `}>
           <div className="overflow-y-auto max-h-40">
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option, index) => (
+            {options.length > 0 ? (
+              options.map((option, index) => (
                 <button
                   key={index}
                   type="button"

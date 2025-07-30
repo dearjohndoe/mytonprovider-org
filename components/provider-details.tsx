@@ -95,7 +95,7 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                     {RenderField('Min Span', printTime(provider.min_span))}
                     {RenderField('Max Bag Size', printSpace(provider.max_bag_size_bytes))}
                     {RenderField('Registration Time', printUnixTime(provider.reg_time))}
-                    {RenderField('Location', provider.location ? `${provider.location.country}, ${provider.location.city}` : 'Unknown')}
+                    {RenderField('Location', provider.location ? `${provider.location.country}${provider.location.city && ', ' + provider.location.city}` : 'Unknown')}
                 </div>
 
                 {/* Hardware */}
