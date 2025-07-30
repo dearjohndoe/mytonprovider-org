@@ -14,7 +14,12 @@ export const parseNumber = (val: string) => {
 
 export const shortenString = (key: string, maxLen: number = 10) => {
   if (key.length <= maxLen) return key
-  return `${key.substring(0, maxLen / 2)}...${key.substring(key.length - maxLen / 2)}`
+  const shorten = `${key.substring(0, maxLen / 2)}...${key.substring(key.length - maxLen / 2)}`
+  if (shorten.length > key.length) {
+    return key
+  }
+
+  return shorten
 }
 
 export const getSortIconType = (

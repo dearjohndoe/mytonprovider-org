@@ -4,6 +4,7 @@ import { FiltersData, FiltersRange } from "@/types/filters";
 import { TriStateField } from "./tri-state-field";
 import { NumberField } from "./number-field";
 import { FieldGroup } from "./group";
+import { PopupList } from "./popup-list";
 
 const defaultFilters = {uptime_gt_percent: 20, uptime_lt_percent: 100} as FiltersData
 
@@ -23,6 +24,13 @@ export function Filters({ onApply, onReset, filtersRange, applyedFilters }: Filt
   }, [filtersRange])
   
   const handleTriStateChange = (name: string, value: boolean | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handlePopupListChange = (name: string, value: string | null) => {
     setFilters((prev) => ({
       ...prev,
       [name]: value,
@@ -69,6 +77,16 @@ export function Filters({ onApply, onReset, filtersRange, applyedFilters }: Filt
             icon={<Info className="w-4 h-4 mr-2" />} 
             title="Provider"
             isExpandedByDefault={true}>
+            <PopupList
+              label="Location"
+              name="location"
+              options={filtersRange?.locations || []}
+              value={filters.location || null}
+              onChange={handlePopupListChange}
+              placeholder="Select location"
+              resetTrigger={resetTrigger}
+              maxHeight="max-h-48"
+            />
             <NumberField
               label="Rating"
               nameFrom="rating_gt"

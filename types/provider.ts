@@ -27,8 +27,16 @@ export interface Telemetry {
   isp?: string | null
 }
 
+export interface Location {
+  country: string
+  country_iso: string
+  city: string
+  time_zone: string
+}
+
 export interface Provider {
   status: number | null
+  location: Location | null
   status_ratio: number
   pubkey: string
   address: string

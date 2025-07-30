@@ -71,7 +71,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
       {/* Details modal */}
       <div className="fixed inset-0 z-50 overflow-hidden" hidden={selectedProvider === null}>
         <div className="absolute inset-0 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative bg-white border shadow-2xl rounded-xl p-8 mt-4 mb-4 mx-auto max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white border shadow-2xl rounded-xl p-8 mt-4 mb-4 mx-auto max-w-5xl w-full max-h-[100vh] overflow-y-auto">
             <button
                 className="absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors duration-200"
                 onClick={() => setSelectedProvider(null)}
@@ -95,7 +95,7 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                   </button>
                 </p>
                 {/* <div className="mx-auto"> */}
-                  <div className="flex justify-center">
+                  <div className="mx-auto">
                     <ProviderDetails provider={selectedProvider} key={`${selectedProvider.pubkey}-details`}/>
                   </div>
                 {/* </div> */}
@@ -113,6 +113,12 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
               <div className="flex items-center">
                 Public Key
                 {getSortIcon("pubkey")}
+              </div>
+            </th>
+            <th onClick={() => onSort("location")}>
+              <div className="flex items-center">
+                Location
+                {getSortIcon("location")}
               </div>
             </th>
             <th onClick={() => {}}>
@@ -168,6 +174,15 @@ export default function ProviderTable({ providers, loading, onSort, sortField, s
                       <Copy className="h-4 w-4" />
                     </button>
                   </div>
+                </td>
+                <td>
+                  {provider.location ? (
+                    <div className="flex items-center">
+                      <span className="text-sm">{provider.location.country} ({provider.location.country_iso})</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500">Unknown</span>
+                  )}
                 </td>
                 <td><StatusCell status={provider.status} ratio={provider.status_ratio} /></td>
                 <td>{(provider.uptime).toFixed(2)} %</td>

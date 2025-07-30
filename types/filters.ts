@@ -8,6 +8,7 @@ export interface FiltersRange {
   max_span_max: number,
   max_bag_size_mb_min: number,
   max_bag_size_mb_max: number,
+  locations: string[],
   
   total_provider_space_min: number,
   total_provider_space_max: number,
@@ -32,6 +33,7 @@ export interface FiltersRange {
 export interface FiltersData {
   rating_gt: number | null, // float 
   rating_lt: number | null, // float
+  location: string | null, // string
   reg_time_days_gt: number | null, // int
   reg_time_days_lt: number | null, // int
   uptime_gt_percent: number | null, // float
