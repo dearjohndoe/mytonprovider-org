@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { BarChart2, Cpu, Globe, Info, Server, SlidersHorizontal } from 'lucide-react';
 import { FiltersData, FiltersRange } from "@/types/filters";
-import { TriStateField } from "./tri-state-field";
+import { ThreeStateField } from "./tri-state-field";
 import { NumberField } from "./number-field";
 import { FieldGroup } from "./group";
 import { PopupList } from "./popup-list";
@@ -207,7 +207,7 @@ export function Filters({ onApply, onReset, filtersRange, applyedFilters }: Filt
               resetTrigger={resetTrigger}
             />
             <TextField label="CPU Name (contains):" name="cpu_name" />
-            <TriStateField
+            <ThreeStateField
               label="CPU is Virtual:"
               name="cpu_is_virtual"
               value={filters.cpu_is_virtual}
@@ -309,7 +309,7 @@ export function Filters({ onApply, onReset, filtersRange, applyedFilters }: Filt
             isExpandedByDefault={false}>
             <TextField label="Storage Git Hash" name="storage_git_hash" />
             <TextField label="Provider Git Hash" name="provider_git_hash" />
-            <TriStateField
+            <ThreeStateField
               label="Is Send Telemetry:"
               name="is_send_telemetry"
               value={filters.is_send_telemetry}

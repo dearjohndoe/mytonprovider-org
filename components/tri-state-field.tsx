@@ -7,7 +7,7 @@ interface TriStateFieldProps {
   onChange: (name: string, value: boolean | null) => void
 }
 
-export function TriStateField({ label, name, value, onChange }: TriStateFieldProps) {
+export function ThreeStateField({ label, name, value, onChange }: TriStateFieldProps) {
   const nextValue = value === null ? true : value === true ? false : null
   const display = value === null ? "Any" : value ? "Yes" : "No"
   const color = value === null ? "bg-gray-200" : "bg-gray-300"
