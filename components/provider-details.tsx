@@ -126,8 +126,8 @@ export function ProviderDetails({ provider }: ProviderDetailsProps) {
                     provider.is_send_telemetry &&
                     <div>
                         <div className="flex items-center mb-2 text-gray-500 font-bold"><Globe className="w-4 h-4 mr-2" />Network</div>
-                        {RenderField('Speedtest Download', t.speedtest_download ? t.speedtest_download / 1000000 : 0, ' Mbps')}
-                        {RenderField('Speedtest Upload', t.speedtest_upload ? t.speedtest_upload / 1000000 : 0, ' Mbps')}
+                        {RenderField('Speedtest Download', t.speedtest_download ? t.speedtest_download / 1024**2 : 0, ' Mbps')}
+                        {RenderField('Speedtest Upload', t.speedtest_upload ? t.speedtest_upload / 1024**2 : 0, ' Mbps')}
                         {RenderField('Speedtest Ping', t.speedtest_ping, '')}
                         {RenderField('Country', t.country)}
                         {RenderField('ISP', t.isp)}
